@@ -125,18 +125,18 @@ The error handling is different, though: Instead of returning an error code, an 
 | | WAVES | |
 | --- | --- | --- |
 | [ ] | wave_clear | Deletes all waveforms |
-| [ ] | wave_add_new | Starts a new waveform |
-| [ ] | wave_add_generic | Adds a series of pulses to the waveform |
-| [ ] | wave_add_serial | Adds serial data to the waveform |
-| [ ] | wave_create | Creates a waveform from added data |
-| [ ] | wave_delete | Deletes one or more waveforms |
-| [ ] | wave_send_once | Transmits a waveform once |
+| [x] | wave_add_new | Starts a new waveform |
+| [x] | wave_add_generic | Adds a series of pulses to the waveform |
+| [x] | wave_add_serial | Adds serial data to the waveform |
+| [x] | wave_create | Creates a waveform from added data |
+| [x] | wave_delete | Deletes one or more waveforms |
+| [x] | wave_send_once | Transmits a waveform once |
 | [ ] | wave_send_repeat | Transmits a waveform repeatedly |
 | [ ] | wave_send_using_mode | Transmits a waveform in the chosen mode |
 | [ ] | wave_chain | Transmits a chain of waveforms |
 | [ ] | wave_tx_at | Returns the current transmitting waveform |
-| [ ] | wave_tx_busy | Checks to see if the waveform has ended |
-| [ ] | wave_tx_stop | Aborts the current waveform |
+| [x] | wave_tx_busy | Checks to see if the waveform has ended |
+| [x] | wave_tx_stop | Aborts the current waveform |
 | [ ] | wave_get_micros | Length in microseconds of the current waveform |
 | [ ] | wave_get_high_micros | Length of longest waveform so far |
 | [ ] | wave_get_max_micros | Absolute maximum allowed micros |

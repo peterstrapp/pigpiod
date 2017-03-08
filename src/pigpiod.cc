@@ -395,6 +395,196 @@ NAN_METHOD(set_noise_filter) {
 
 
 // ###########################################################################
+// Waves
+// ###########################################################################
+
+NAN_METHOD(wave_add_generic) {
+  if(info.Length() < 2    ||
+     !info[0]->IsInt32()  || // pi
+     !info[1]->IsArray()     // pulses
+  ) {
+    return Nan::ThrowError(Nan::ErrnoException(EINVAL, "wave_add_generic", ""));
+  }
+
+  int pi = info[0]->Int32Value();
+
+  v8::Isolate* isolate = v8::Isolate::GetCurrent();
+
+  v8::Local<v8::Array> jsPulses = v8::Local<v8::Array>::Cast(info[1]);
+  int numPulses = jsPulses->Get(v8::String::NewFromUtf8(isolate, "length"))->Uint32Value();
+
+  gpioPulse_t pulses[numPulses];
+
+  for (int i = 0; i < numPulses; i++) {
+    v8::Handle<v8::Object> aPulse = v8::Handle<v8::Object>::Cast(jsPulses->Get(i));
+    v8::Handle<v8::Value> gpioOn = aPulse->Get(v8::String::NewFromUtf8(isolate, "gpioOn"));
+    v8::Handle<v8::Value> gpioOff = aPulse->Get(v8::String::NewFromUtf8(isolate, "gpioOff"));
+    v8::Handle<v8::Value> usDelay = aPulse->Get(v8::String::NewFromUtf8(isolate, "usDelay"));
+
+    gpioPulse_t pulse;
+    pulse.gpioOn = gpioOn->IntegerValue();
+    pulse.gpioOff = gpioOff->IntegerValue();
+    pulse.usDelay = usDelay->IntegerValue();
+
+    pulses[i] = pulse;
+  }
+
+  int rc = wave_add_generic(pi, numPulses, pulses);
+  if(rc < 0) {
+    return ThrowPigpiodError(rc, "wave_add_generic");
+  }
+
+  info.GetReturnValue().Set(rc);
+}
+
+NAN_METHOD(wave_add_serial) {
+  if(info.Length() < 7      ||
+     !info[0]->IsInt32()    || // pi
+     !info[1]->IsUint32()   || // gpio
+     !info[2]->IsUint32()   || // baud
+     !info[3]->IsUint32()   || // data bits
+     !info[4]->IsUint32()   || // stop bits
+     !info[5]->IsUint32()   || // offset
+     !info[6]->IsArray()       // data
+  ) {
+    return Nan::ThrowError(Nan::ErrnoException(EINVAL, "wave_add_serial", ""));
+  }
+
+  int pi = info[0]->Int32Value();
+  int gpio = info[1]->Uint32Value();
+  int baud = info[2]->Uint32Value();
+  int dataBits = info[3]->Uint32Value();
+  int stopBits = info[4]->Uint32Value();
+  int offset = info[5]->Uint32Value();
+
+  v8::Isolate* isolate = v8::Isolate::GetCurrent();
+
+  v8::Local<v8::Array> arr = v8::Local<v8::Array>::Cast(info[6]);
+  int length = arr->Get(v8::String::NewFromUtf8(isolate, "length"))->Uint32Value();
+
+  char data[length];
+  for(int i = 0; i < length; i++)
+  {
+      v8::Local<v8::Value> element = arr->Get(i);
+      data[i] = element->IntegerValue();
+  }
+
+  int rc = wave_add_serial(pi, gpio, baud, dataBits, stopBits, offset, length, data);
+  if(rc < 0) {
+    return ThrowPigpiodError(rc, "wave_add_serial");
+  }
+
+  info.GetReturnValue().Set(rc);
+}
+
+NAN_METHOD(wave_add_new) {
+  if(info.Length() < 1    ||
+     !info[0]->IsInt32()     // pi
+  ) {
+    return Nan::ThrowError(Nan::ErrnoException(EINVAL, "wave_add_new", ""));
+  }
+
+  int pi = info[0]->Int32Value();
+
+  int rc = wave_add_new(pi);
+  if(rc < 0) {
+    return ThrowPigpiodError(rc, "wave_add_new");
+  }
+
+  info.GetReturnValue().Set(rc);
+}
+
+NAN_METHOD(wave_create) {
+  if(info.Length() < 1    ||
+     !info[0]->IsInt32()     // pi
+  ) {
+    return Nan::ThrowError(Nan::ErrnoException(EINVAL, "wave_create", ""));
+  }
+
+  int pi = info[0]->Int32Value();
+
+  int rc = wave_create(pi);
+  if(rc < 0) {
+    return ThrowPigpiodError(rc, "wave_create");
+  }
+
+  info.GetReturnValue().Set(rc);
+}
+
+NAN_METHOD(wave_tx_stop) {
+  if(info.Length() < 1    ||
+     !info[0]->IsInt32()     // pi
+  ) {
+    return Nan::ThrowError(Nan::ErrnoException(EINVAL, "wave_tx_stop", ""));
+  }
+
+  int pi = info[0]->Int32Value();
+
+  int rc = wave_tx_stop(pi);
+  if(rc < 0) {
+    return ThrowPigpiodError(rc, "wave_tx_stop");
+  }
+
+  info.GetReturnValue().Set(rc);
+}
+
+NAN_METHOD(wave_send_once) {
+  if(info.Length() < 2    ||
+     !info[0]->IsInt32()  || // pi
+     !info[1]->IsUint32()    // wave id
+  ) {
+    return Nan::ThrowError(Nan::ErrnoException(EINVAL, "wave_send_once", ""));
+  }
+
+  int pi = info[0]->Int32Value();
+  unsigned waveId = info[1]->Uint32Value();
+
+  int rc = wave_send_once(pi, waveId);
+  if(rc < 0) {
+    return ThrowPigpiodError(rc, "wave_send_once");
+  }
+
+  info.GetReturnValue().Set(rc);
+}
+
+NAN_METHOD(wave_delete) {
+  if(info.Length() < 2    ||
+     !info[0]->IsInt32()  || // pi
+     !info[1]->IsUint32()    // wave id
+  ) {
+    return Nan::ThrowError(Nan::ErrnoException(EINVAL, "wave_delete", ""));
+  }
+
+  int pi = info[0]->Int32Value();
+  unsigned waveId = info[1]->Uint32Value();
+
+  int rc = wave_delete(pi, waveId);
+  if(rc < 0) {
+    return ThrowPigpiodError(rc, "wave_delete");
+  }
+
+  info.GetReturnValue().Set(rc);
+}
+
+NAN_METHOD(wave_tx_busy) {
+  if(info.Length() < 1    ||
+     !info[0]->IsInt32()     // pi
+  ) {
+    return Nan::ThrowError(Nan::ErrnoException(EINVAL, "wave_tx_busy", ""));
+  }
+
+  int pi = info[0]->Int32Value();
+
+  int rc = wave_tx_busy(pi);
+  if(rc < 0) {
+    return ThrowPigpiodError(rc, "wave_tx_busy");
+  }
+
+  info.GetReturnValue().Set(rc);
+}
+
+
+// ###########################################################################
 // SPI
 // ###########################################################################
 
@@ -1013,6 +1203,14 @@ NAN_MODULE_INIT(InitAll) {
   SetFunction(target, "set_watchdog", set_watchdog);
   SetFunction(target, "set_glitch_filter", set_glitch_filter);
   SetFunction(target, "set_noise_filter", set_noise_filter);
+  SetFunction(target, "wave_add_new", wave_add_new);
+  SetFunction(target, "wave_add_generic", wave_add_generic);
+  SetFunction(target, "wave_add_serial", wave_add_serial);
+  SetFunction(target, "wave_create", wave_create);
+  SetFunction(target, "wave_send_once", wave_send_once);
+  SetFunction(target, "wave_tx_stop", wave_tx_stop);
+  SetFunction(target, "wave_delete", wave_delete);
+  SetFunction(target, "wave_tx_busy", wave_tx_busy);
   SetFunction(target, "spi_open", spi_open);
   SetFunction(target, "spi_close", spi_close);
   SetFunction(target, "spi_xfer", spi_xfer);
